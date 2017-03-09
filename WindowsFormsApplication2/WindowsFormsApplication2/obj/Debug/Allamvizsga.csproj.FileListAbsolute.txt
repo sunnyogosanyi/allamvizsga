@@ -1,0 +1,12 @@
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\WindowsFormsApplication2.exe.config
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.exe
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.pdb
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\WindowsFormsApplication2.exe
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\WindowsFormsApplication2.pdb
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\Allamvizsga.csprojResolveAssemblyReference.cache
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.Form1.resources
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.Properties.Resources.resources
+C:\Users\Example John\Documents\Visual Studio 2015\Projects\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\Allamvizsga.csproj.GenerateResource.Cache
+C:\Users\Example John\OneDrive\GIT_Allamvizsga\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\WindowsFormsApplication2.exe.config
+C:\Users\Example John\OneDrive\GIT_Allamvizsga\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.exe
+C:\Users\Example John\OneDrive\GIT_Allamvizsga\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.pdb
