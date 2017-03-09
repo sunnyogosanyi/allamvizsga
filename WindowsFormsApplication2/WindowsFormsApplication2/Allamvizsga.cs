@@ -82,7 +82,7 @@ namespace WindowsFormsApplication2
                 // Read the first batch of the TcpServer response bytes.
                 Int32 bytes = stream.Read(data, 0, data.Length);
                 responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                
+                Console.WriteLine(responseData);    
                 DrawFunction(responseData);
 
                                 textBox2.Text = responseData;
@@ -108,6 +108,7 @@ namespace WindowsFormsApplication2
             string messType;
             string messCommand;
             
+
             try
             {
                 decode(message, out messType, out messCommand);

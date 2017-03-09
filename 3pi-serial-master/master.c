@@ -26,6 +26,7 @@ char* messType;
 char* messCommand;
 
 
+
 // This routine will be called repeatedly to keep the PID algorithm running
 void pid_check()
 {
@@ -82,25 +83,15 @@ int r=0;
 // the music playing and calls pid_check() to keep following the line.
 char read_next_byte()
 {
-clear();
-	while(serial_get_received_bytes() == read_index)
+	char ret = '^';
+	if (serial_get_received_bytes() != read_index)
 	{
-	
-		// pid_check takes some time; only run it if we don't have more bytes to process
-	
-		lcd_goto_xy(3,0);
-		print_long(r++);
-	}
-	char ret = buffer[read_index];
-	read_index ++;
-	if(read_index >= 100)
+		ret = buffer[read_index];
+		read_index ++;
+		if(read_index >= 100)
 		read_index = 0;
+	}
 	
-	lcd_goto_xy(0,1);
-	print_long(read_index);
-	lcd_goto_xy(0,0);
-	print_character(ret);
-	delay(500);
 	return ret;
 }
 
@@ -387,21 +378,22 @@ void stop_pid()
 	set_motors(0,0);
 	pid_enabled = 0;
 }
-
+int z=0;
 /////////////////////////////////////////////////////////////////////
 int readFromSerial()
 {
 	char ch;
 	int index=0;
-
-	while( (ch = read_next_byte()) != '\n' )
+	
+	while( ((ch = read_next_byte()) != '\n') && (ch != '^') )
 	{
 		message[index] = ch;
 		index++;
-		// update checksum using ch here
+		
 	}
 	message[index-1]='\0';
 	return index;
+	
 }
 
 void jsonDecode(char* message)
@@ -432,22 +424,27 @@ const char* jsonEncode(char* messType, char* messCommand)
 
 void sendJson(char* messType, char* messCommand)
 {
-	int len = strlen(messType) + strlen(messCommand) +4;
-	
-	char target[len];
-	//strcat(target,messType);
-	snprintf( target, sizeof( target ), "{%s:%s}", messType, messCommand);
-	sendMessage(target);
-	//lcd_goto_xy(8,1);
-	print(target);
+	int len = strlen(messType) + strlen(messCommand) +6;
+	if (len > 8){
+		char target[len];
+		//strcat(target,messType);
+		snprintf( target, sizeof( target ), "{%s:%s}", messType, messCommand);
+		sendMessage(target);
+		lcd_goto_xy(2,0);
+		print(target);
+	}
+	lcd_goto_xy(0,0);
+	print_long(len);
 }
 
 
 
-void sendMessage(char* message){
+void sendMessage(char* messag){
 	int len;
-	len = strlen(message);
-	serial_send(message,len);
+	len = strlen(messag);
+	
+	serial_send(messag,len);
+	
 }
 
 
@@ -462,19 +459,27 @@ int main()
 	// start receiving data at 115.2 kbaud
 	serial_set_baud_rate(115200);
 	serial_receive_ring(buffer, 100);
+	clear();
+	int x =0;
 	while(1)
 	{
 		
 		leng = readFromSerial();
 		jsonDecode(message);
+		//free(message);		
 		
+		sendJson(messType,messCommand);
+		message[0] = '\0';
+		//lcd_goto_xy(3,1);
+		//print(messCommand);
 		
-		//sendJson(messType,messCommand);
-		clear();
-		lcd_goto_xy(0,0);
-		print_long(i++);
+		lcd_goto_xy(0,1);
+		print_long(x++);
+		lcd_goto_xy(5,1);
+		int ln = strlen(message);
+		print_long(ln);
 		delay_ms(1000);
-		
+		clear();
 	}
 }
 
