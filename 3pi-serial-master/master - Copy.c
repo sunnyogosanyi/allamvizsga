@@ -26,7 +26,7 @@ char* messType;
 char* messCommand;
 const char welcome[] PROGMEM = ">g32>>c32";
 const char go[] PROGMEM = "L16 cdegreg4";
-unsigned int position;
+
 
 // This routine will be called repeatedly to keep the PID algorithm running
 void pid_check()
@@ -340,7 +340,7 @@ void display_readings(const unsigned int *calibrated_values)
         // calibrated values are in the range of 0 to 1000, and
         // 1000/101 is 9 with integer math.
         char c = display_characters[calibrated_values[i]/101];
-		
+
         // Display the bar graph character.
         print_character(c);
     }
@@ -604,174 +604,29 @@ void sendMessage(char* messag){
     
 }
 
-int gogogo(){
-	int returnValue = -1;
-	//left 1
-	//right 2
-	//both 3
-	//nothing 4
-
-	position = read_line(sensors,IR_EMITTERS_ON);
-	lcd_goto_xy(0,0);
-	print_long(position);
-	lcd_goto_xy(0,1);
-	display_readings(sensors);
-
-	if ((sensors[0] > 500) && (sensors[4] > 500))
-	{
-		set_motors(0,0);
-		lcd_goto_xy(5,0);
-		print("BB");
-		returnValue = 3;
-	}
-	else if ((sensors[0] > 500) && (sensors[4] < 200))
-	{
-		set_motors(0,0);
-		lcd_goto_xy(5,0);
-		print("LL");
-		//delay_ms(2000);
-		//delay_ms(2000);
-		do
-		{
-			set_motors(20,20);
-			lcd_goto_xy(0,0);
-			print_long(position);
-			lcd_goto_xy(0,1);
-			display_readings(sensors);
-			position = read_line(sensors,IR_EMITTERS_ON);
-		}
-		while((sensors[0] > 300) && (sensors[2] > 100));
-		
-		set_motors(0,0);
-		//delay_ms(2000);
-		clear();
-		lcd_goto_xy(0,0);
-		print_long(sensors[0]);
-		if (sensors[0] < 300)
-		{
-			lcd_goto_xy(5,0);
-			print("BB");
-			returnValue = 3;
-		}
-		else if (sensors[2] < 100)
-		{
-			lcd_goto_xy(5,0);
-			print("LL");
-			returnValue = 1;
-		}
-		delay_ms(2000);
-				
-	}
-	else if ((sensors[4] > 500) && (sensors[0] < 200))
-	{
-		set_motors(0,0);
-		lcd_goto_xy(5,0);
-		print("RR");
-	//	delay_ms(2000);
-		do
-		{
-			set_motors(20,20);
-			lcd_goto_xy(0,0);
-			print_long(position);
-			lcd_goto_xy(0,1);
-			display_readings(sensors);
-			position = read_line(sensors,IR_EMITTERS_ON);
-		}
-		while((sensors[4] > 300) && (sensors[1] > 100));
-		
-		set_motors(0,0);
-		clear();
-		lcd_goto_xy(0,0);
-		print_long(sensors[4]);
-		if (sensors[1] < 100)
-		{
-			lcd_goto_xy(5,0);
-			print("RR");
-			returnValue = 2;
-		}
-		else if (sensors[4] < 300)
-		{
-			lcd_goto_xy(5,0);
-			print("BB");
-			returnValue = 3;
-		}
-		delay_ms(2000);
-	//	delay_ms(2000);
-		
-		
-	}
-	else
-	{
-		if (position < 2000)
-		{
-			lcd_goto_xy(5,0);
-			print("CL");
-			returnValue = 4;
-			set_motors(20,30);
-		}
-		else if (position > 2000)
-		{
-			set_motors(30,20);
-			lcd_goto_xy(5,0);
-			print("CR");
-			returnValue = 4;
-		}
-	}
-
-	return returnValue;
-}
-
-void turnOn(int side){
-	//1 left
-	//2 right
-	int left = 0;
-	int right = 0;
-	switch(side)
-	{
-		case 1:
-			left = 0;
-			right = 20;
-			break;
-		case 2:
-			left = 20;
-			right = 0;
-			break;
-		default:
-			lcd_goto_xy(0,1);
-			print("BB");
-			break;
-	}
-	do
-	{
-		set_motors(left,right);
-		//lcd_goto_xy(0,0);
-		//print_long(position);
-		//lcd_goto_xy(0,1);
-		//display_readings(sensors);
-		position = read_line(sensors,IR_EMITTERS_ON);
-	}
-	while((position > 2100) || (position < 1900));
-}
-
 
 int main()
 {
 	initialize();
 	int x=0;
-	clear();
-	int leng=0;
+    clear();
+    int leng=0;
    
-	serial_set_baud_rate(115200);
-	serial_receive_ring(buffer, 100);
-	clear();
-	char received[10] = "STOP";
-	char sent[10] = "NOPE";
-	int ret;
-	while(1)
-	{
-		
-		/*
+    serial_set_baud_rate(115200);
+    serial_receive_ring(buffer, 100);
+    clear();
+   char received[10] = "STOP";
+   char sent[10] = "NOPE";
+    while(1)
+    {
+		unsigned int position = read_line(sensors,IR_EMITTERS_ON);
+		 lcd_goto_xy(5,0);
+		 print_long(position);
+		 lcd_goto_xy(0,0);
+		 display_readings(sensors);
 		leng = readFromSerial();
+		
+		
 		if (leng>0)
 		{
 			//strcpy(received,message);
@@ -781,35 +636,70 @@ int main()
 			print(received);
 			sendMessage(sent);
 		}
-		
+    
 		lcd_goto_xy(0,1);
 		print_long(x++);
-
-		*/
-		//left 1
-		//right 2
-		//both 3
-		//nothing 4
-		ret = gogogo();
-
-		lcd_goto_xy(0,0);
-		print_long(ret);
-		if ((ret == 1) || (ret == 2))
-		{
-			delay_ms(2000);
 		
-			turnOn(ret);
-		}
-		else if (ret == 3)
-		{
+		  if(position < 500)
+		  {
+			  //clear();
+			  //print("LEFT");
+			 set_motors(0,0);
+			 sent[0]='\0';
+			 strcpy(sent,"L");
+			 if (strcmp(message, "L")==0)
+			 {
+					
+				 // char command = read_next_byte();
+				 // print(command);
+				  set_motors(0,30);
+				  delay_ms(1650);
+				  set_motors(0,0);
+			}
+		  }
+		  else if(position < 3500)
+		  {
+		   sent[0]='\0';
+		   strcpy(sent,"NOPE");
+		   
+			if (position < 2000)
+			{
+			  set_motors(20,30);
+
+			}else if(position > 2000){
+			  set_motors(30,20);
+			}
+			  //permit=1;
+			  //clear();
+			  //print("FORWARD");
+			
+			  left_led(1);
+			  right_led(1);
+		  }
+		  else
+		  {
+			//clear();
+			//print("RIGHT");
+			  
 			set_motors(0,0);
-			lcd_goto_xy(0,0);
-			print_long(ret);
-			delay_ms(5000);
-		}
+			sent[0]='\0';
+			strcpy(sent,"R");
+			if (strcmp(message, "R")==0)
+			{
+				//  char command = read_next_byte();
+				//  print(command);
+				set_motors(30,0);
+				delay_ms(1650);
+				set_motors(0,0);
+			}
+		  }
+		
+		
+		
+		
 		//delay_ms(200);
-		//clear();
+		clear();
         
-	}
+    }
 }
 
