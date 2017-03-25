@@ -19,13 +19,13 @@ namespace WindowsFormsApplication2
         Graphics drawingArea;
         Pen blackPan = new Pen(Color.Green);
         String responseData = String.Empty;
-        String server = "192.168.100.21";
+        String server = "192.168.100.14";
         Int32 port = 80;
         TcpClient client;
         Byte[] data;
-
+        bool var = true;
         NetworkStream stream;
-
+        int globalNumber = 1;
         String message;
         int x1 = 200;
         int y1 = 200;
@@ -42,15 +42,35 @@ namespace WindowsFormsApplication2
         {
 
             String message = textBox1.Text;
-            // Connect(message);
-            Connect(server,message);
-            
+           
+            message = "Csecs";
+            while (var)
+            {
+                // Connect(message);
+                Connect(server, message);
+                Console.WriteLine("Wait");
+                System.Threading.Thread.Sleep(1000);
+            }
         }
 
         void Connect(String server, String message)
         {
             try
             {
+                switch (responseData)
+                {
+                    case "L":
+                        message = "L";
+                        break;
+                    case "R":
+                        message = "R";
+                        break;
+                    default:
+                        message = "Csecs";
+                        break;
+                }
+
+
                 // Create a TcpClient.
                 // Note, for this client to work you need to have a TcpServer 
                 // connected to the same address as specified by the server, port
@@ -77,15 +97,15 @@ namespace WindowsFormsApplication2
                 data = new Byte[256];
 
                 // String to store the response ASCII representation.
-                String responseData = String.Empty;
+                
 
                 // Read the first batch of the TcpServer response bytes.
                 Int32 bytes = stream.Read(data, 0, data.Length);
                 responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                Console.WriteLine(responseData);    
-                DrawFunction(responseData);
-
-                                textBox2.Text = responseData;
+                Console.WriteLine(responseData);
+                //DrawFunction(responseData);
+                test(responseData);
+                textBox2.Text = responseData;
                 // Close everything.
                 stream.Close();
                 client.Close();
@@ -99,45 +119,60 @@ namespace WindowsFormsApplication2
                 Console.WriteLine("SocketException: {0}", e);
             }
 
-            Console.WriteLine("\n Press Enter to continue...");
-            Console.Read();
         }
 
-        void DrawFunction(string message)
+        void test(string mess)
         {
-            string messType;
-            string messCommand;
-            
+            if (mess.Equals("R"))
+            {
+                globalNumber++;
+            }
+            else if (mess.Equals("L"))
+            {
+                globalNumber--;
+            }
+            if (globalNumber>4)
+            {
+                globalNumber = 1;
+            }
+             if(globalNumber < 1)
+            {
+                globalNumber = 4;
+            }
+            textBox2.Text = globalNumber.ToString();
+            DrawFunction(globalNumber);
+        }
 
+        void DrawFunction(int message)
+        {
+                 
             try
             {
-                decode(message, out messType, out messCommand);
-                Console.WriteLine("Received: {0} {1}", messType, messCommand);
-                switch (messType)
+                switch (message)
                 {
-                    case "D":
-                        y1 += Int32.Parse(messCommand);
+                    case 1:
+                        y1 += 30;
                         //y2 = Int32.Parse(messCommand);
                         //x2 = 10;
                         break;
-                    case "U":
-                        y1 -= Int32.Parse(messCommand);
+                    case 3:
+                        y1 -= 30;
                         //y2 = Int32.Parse(messCommand);
                         //x2 = 10;
                         break;
-                    case "L":
-                        x1 -= Int32.Parse(messCommand);
+                    case 2:
+                        x1 -= 30;
                        // x2 = Int32.Parse(messCommand);
                        // y2 = 10;
                         break;
-                    case "R":
-                        x1 += Int32.Parse(messCommand);
+                    case 4:
+                        x1 += 30;
                         //x2 = Int32.Parse(messCommand);
                         //y2 = 10;
                         break;
                 }
                 drawingArea.FillRectangle(Brushes.Black,new Rectangle( x1, y1, x2, y2));
-                Console.WriteLine("x1 {0} y1 {1} x2 {2} y2 {3} ",x1,y1,x2,y2);
+                
             }
             catch (Exception e)
             {
@@ -156,63 +191,10 @@ namespace WindowsFormsApplication2
             messCommand = words[1];
            
         }
-
-        void Connect(String message)
-        {
-            try
-            {
-                data = new Byte[256];
-                data = System.Text.Encoding.ASCII.GetBytes(message);
-                // Send the message to the connected TcpServer. 
-                Console.WriteLine(data.Length.ToString());
-                Console.WriteLine("Sent: {0}", message);
-                stream = client.GetStream();
-                stream.Write(data, 0, data.Length);
-                
-                
-
-                // Receive the TcpServer.response.
-
-                // Buffer to store the response bytes.
-                data = new Byte[256];
-
-                // String to store the response ASCII representation.
-                
-
-                // Read the first batch of the TcpServer response bytes.
-                bytes = stream.Read(data, 0, data.Length);
-                responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                Console.WriteLine("Received: {0}", responseData);
-                textBox2.Text = responseData;
-                //int num = 1;
-                //try
-                //{
-                //    num = Convert.ToInt32(responseData);
-                //}
-                //catch
-                //{
-                //    num = 1;
-                //}
-                //drawingArea.DrawLine(blackPan, num*10, 10, num*20, 20);
-
-               
-            }
-            catch (ArgumentNullException e)
-            {
-                Console.WriteLine("ArgumentNullException: {0}", e);
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SocketException: {0}", e);
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine("IOException: {0}", e);
-            }
-            Console.WriteLine("\n Press Enter to continue...");
-            
-        }
         
-
+        private void button1_Click(object sender, EventArgs e)
+        {
+            test(textBox1.Text);
+        }
     }
 }
