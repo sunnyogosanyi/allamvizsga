@@ -19,7 +19,7 @@ namespace WindowsFormsApplication2
         Graphics drawingArea;
         Pen blackPan = new Pen(Color.Green);
         String responseData = String.Empty;
-        String server = "192.168.100.21";
+        String server = "192.168.88.14";
         Int32 port = 80;
         TcpClient client;
         Byte[] data;

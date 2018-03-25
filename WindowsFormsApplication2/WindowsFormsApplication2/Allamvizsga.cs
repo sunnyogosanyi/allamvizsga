@@ -19,8 +19,8 @@ namespace WindowsFormsApplication2
         Graphics drawingArea;
         Pen blackPan = new Pen(Color.Green);
         String responseData = String.Empty;
-        String server = "192.168.100.14";
-        Int32 port = 80;
+        String server = "192.168.88.210";
+        Int32 port = 5200;
         TcpClient client;
         Byte[] data;
         bool var = true;
@@ -43,39 +43,27 @@ namespace WindowsFormsApplication2
 
             String message = textBox1.Text;
            
-            message = "Csecs";
-            while (var)
-            {
+            //message = "Csecs";
+           
                 // Connect(message);
                 Connect(server, message);
                 Console.WriteLine("Wait");
-                System.Threading.Thread.Sleep(1000);
-            }
+                //System.Threading.Thread.Sleep(1000);
+            
         }
 
         void Connect(String server, String message)
         {
             try
             {
-                switch (responseData)
-                {
-                    case "L":
-                        message = "L";
-                        break;
-                    case "R":
-                        message = "R";
-                        break;
-                    default:
-                        message = "Csecs";
-                        break;
-                }
+             
 
 
                 // Create a TcpClient.
                 // Note, for this client to work you need to have a TcpServer 
                 // connected to the same address as specified by the server, port
                 // combination.
-                Int32 port = 80;
+                
                 TcpClient client = new TcpClient(server, port);
 
                 // Translate the passed message into ASCII and store it as a Byte array.
@@ -94,21 +82,14 @@ namespace WindowsFormsApplication2
                 // Receive the TcpServer.response.
 
                 // Buffer to store the response bytes.
-                data = new Byte[256];
-
-                // String to store the response ASCII representation.
                 
 
-                // Read the first batch of the TcpServer response bytes.
-                Int32 bytes = stream.Read(data, 0, data.Length);
-                responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                Console.WriteLine(responseData);
-                //DrawFunction(responseData);
-                test(responseData);
-                textBox2.Text = responseData;
-                // Close everything.
+                // String to store the response ASCII representation.
+
+                stream.Flush();
                 stream.Close();
                 client.Close();
+
             }
             catch (ArgumentNullException e)
             {
@@ -194,7 +175,18 @@ namespace WindowsFormsApplication2
         
         private void button1_Click(object sender, EventArgs e)
         {
-            test(textBox1.Text);
+            TcpListener serverSocket = new TcpListener(5100);
+            int requestCount = 0;
+            TcpClient clientSocket = default(TcpClient);
+            serverSocket.Start();
+            Console.WriteLine(" >> Server Started");
+            clientSocket = serverSocket.AcceptTcpClient();
+            Console.WriteLine(" >> Accept connection from client");
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
