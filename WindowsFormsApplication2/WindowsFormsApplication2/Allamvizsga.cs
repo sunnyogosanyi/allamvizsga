@@ -55,15 +55,7 @@ namespace WindowsFormsApplication2
         void Connect(String server, String message)
         {
             try
-            {
-             
-
-
-                // Create a TcpClient.
-                // Note, for this client to work you need to have a TcpServer 
-                // connected to the same address as specified by the server, port
-                // combination.
-                
+            {                         
                 TcpClient client = new TcpClient(server, port);
 
                 // Translate the passed message into ASCII and store it as a Byte array.
@@ -177,11 +169,14 @@ namespace WindowsFormsApplication2
         {
             TcpListener serverSocket = new TcpListener(5100);
             int requestCount = 0;
+
             TcpClient clientSocket = default(TcpClient);
             serverSocket.Start();
-            Console.WriteLine(" >> Server Started");
+            label1.Text = " >> Server Started";
             clientSocket = serverSocket.AcceptTcpClient();
-            Console.WriteLine(" >> Accept connection from client");
+            label2.Text = " >> Accept connection from client";
+
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
