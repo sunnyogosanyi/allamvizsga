@@ -133,7 +133,7 @@ namespace ServerSocketForm
 
         private void button3_Click(object sender, EventArgs e)
         {
-           // textBox3.Clear;
+            textBox3.Text = "";
         }
     }
 }
