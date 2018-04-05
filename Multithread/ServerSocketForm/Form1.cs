@@ -78,17 +78,22 @@ namespace ServerSocketForm
 
         private void button2_Click(object sender, EventArgs e)
         {
+            SendCommandToClient(textBox2.Text);
+        }
+
+
+        private void SendCommandToClient(string text)
+        {
             try
             {
                 TcpClient client = new TcpClient(textBox6.Text, Int32.Parse(textBox7.Text));
- 
-                StreamWriter writer = new StreamWriter(client.GetStream());
-                String s = textBox2.Text;
-             
-                    writer.WriteLine(s);
-                    writer.Flush();
 
+                StreamWriter writer = new StreamWriter(client.GetStream());
                 
+                writer.WriteLine(text);
+                writer.Flush();
+
+
                 writer.Close();
                 client.Close();
             }
@@ -134,6 +139,16 @@ namespace ServerSocketForm
         private void button3_Click(object sender, EventArgs e)
         {
             textBox3.Text = "";
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            SendCommandToClient("L");
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            SendCommandToClient("R");
         }
     }
 }
