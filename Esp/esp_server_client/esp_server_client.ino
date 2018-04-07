@@ -3,7 +3,10 @@
 const char* ssid = "ASUS_C4";
 const char* password = "Mazda20160130!";
 
-const char* host = "192.168.88.28";
+//Eva laptop
+//const char* host = "192.168.88.28";
+//PC
+const char* host = "192.168.88.14";
 String ipAddress;
 
 IPAddress ip(192,168,88,210);

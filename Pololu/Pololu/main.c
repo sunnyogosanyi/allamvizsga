@@ -11,6 +11,7 @@
 #include <pololu/3pi.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 // PID constants
 unsigned int pid_enabled = 0;
@@ -604,23 +605,38 @@ void sendMessage(char* messag){
     
 }
 
+char* concat(const char *s1, const char *s2)
+{
+	char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the null-terminator
+	//in real code you would check for errors in malloc here
+	strcpy(result, s1);
+	strcat(result, s2);
+	return result;
+}
 
 int main()
 {
+	
 	initialize();
 	int x=0;
     clear();
     int leng=0;
-   
+   int motorSpeed = 30;
     serial_set_baud_rate(115200);
     serial_receive_ring(buffer, 100);
     clear();
-   char received[10] = "STOP";
-   char sent[10] = "NOPE";
+	char received[10] = "STOP";
+	char sent[10] = "NOPE";
+	int leftMessageSent = 0;
+	int rightMessageSent = 0;
+	int forwardMessageSent = 0;
+	
+	long startTime, endTime;
+	startTime = get_ms();
     while(1)
     {
 		unsigned int position = read_line(sensors,IR_EMITTERS_ON);
-		 lcd_goto_xy(5,0);
+		 lcd_goto_xy(0,1);
 		 print_long(position);
 		 lcd_goto_xy(0,0);
 		 display_readings(sensors);
@@ -634,72 +650,67 @@ int main()
 			//itoa(position,temp,10);
 			lcd_goto_xy(3,1);
 			print(received);
-			sendMessage(sent);
+			sendMessage(position);
 		}
+		
+		
+		if(position < 1500)
+		{
+			// We are far to the right of the line: turn left.
+			set_motors(0,motorSpeed);	
+			left_led(1);
+			right_led(0);
+			if ((position < 1000) && (leftMessageSent == 0)){
+				endTime = get_ms();
+				long timeDiff = endTime- startTime;
+				startTime = endTime;
+				char timeBuff[50];
+				ltoa(timeDiff,timeBuff,10);
+				sendMessage(concat(timeBuff,"L"));
+				leftMessageSent = 1;
+				rightMessageSent = 0;
+				forwardMessageSent = 0;
+			}
+		}
+		else if(position < 2500)
+		{			
+			set_motors(motorSpeed,motorSpeed);
+			left_led(1);
+			right_led(1);
+			if (forwardMessageSent == 0){
+				sendMessage("F");
+				leftMessageSent = 0;
+				rightMessageSent = 0;
+				forwardMessageSent = 1;
+			}
+		}
+		else
+		{
+			// We are far to the left of the line: turn right.
+			set_motors(motorSpeed,0);
+			left_led(0);
+			right_led(1);
+			if ((position > 3000) &&(rightMessageSent == 0)){
+				endTime = get_ms();
+				long timeDiff = endTime- startTime;
+				startTime = endTime;
+				char timeBuff[50];
+				ltoa(timeDiff,timeBuff,10);
+				sendMessage(concat(timeBuff,"R"));
+				leftMessageSent = 0;
+				rightMessageSent = 1;
+				forwardMessageSent = 0;
+			}
+		}
+		
     
-		lcd_goto_xy(0,1);
+	/*	lcd_goto_xy(0,1);
 		print_long(x++);
-		
-		  if(position < 500)
-		  {
-			  //clear();
-			  //print("LEFT");
-			 set_motors(0,0);
-			 sent[0]='\0';
-			 strcpy(sent,"L");
-			 if (strcmp(message, "L")==0)
-			 {
-					
-				 // char command = read_next_byte();
-				 // print(command);
-				  set_motors(0,30);
-				  delay_ms(1650);
-				  set_motors(0,0);
-			}
-		  }
-		  else if(position < 3500)
-		  {
-		   sent[0]='\0';
-		   strcpy(sent,"NOPE");
-		   
-			if (position < 2000)
-			{
-			  set_motors(20,30);
-
-			}else if(position > 2000){
-			  set_motors(30,20);
-			}
-			  //permit=1;
-			  //clear();
-			  //print("FORWARD");
-			
-			  left_led(1);
-			  right_led(1);
-		  }
-		  else
-		  {
-			//clear();
-			//print("RIGHT");
-			  
-			set_motors(0,0);
-			sent[0]='\0';
-			strcpy(sent,"R");
-			if (strcmp(message, "R")==0)
-			{
-				//  char command = read_next_byte();
-				//  print(command);
-				set_motors(30,0);
-				delay_ms(1650);
-				set_motors(0,0);
-			}
-		  }
-		
-		
-		
+	
 		
 		//delay_ms(200);
 		clear();
-        
+        */
     }
 }
 
