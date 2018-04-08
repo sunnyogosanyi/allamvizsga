@@ -632,7 +632,7 @@ int main()
 	int forwardMessageSent = 0;
 	
 	long startTime, endTime;
-	startTime = get_ms();
+	startTime = get_ms() /10;
     while(1)
     {
 		unsigned int position = read_line(sensors,IR_EMITTERS_ON);
@@ -661,12 +661,12 @@ int main()
 			left_led(1);
 			right_led(0);
 			if ((position < 1000) && (leftMessageSent == 0)){
-				endTime = get_ms();
+				endTime = get_ms()/10;
 				long timeDiff = endTime- startTime;
 				startTime = endTime;
 				char timeBuff[50];
 				ltoa(timeDiff,timeBuff,10);
-				sendMessage(concat(timeBuff,"L"));
+				sendMessage(concat(timeBuff,"*L"));
 				leftMessageSent = 1;
 				rightMessageSent = 0;
 				forwardMessageSent = 0;
@@ -691,12 +691,12 @@ int main()
 			left_led(0);
 			right_led(1);
 			if ((position > 3000) &&(rightMessageSent == 0)){
-				endTime = get_ms();
+				endTime = get_ms()/10;
 				long timeDiff = endTime- startTime;
 				startTime = endTime;
 				char timeBuff[50];
 				ltoa(timeDiff,timeBuff,10);
-				sendMessage(concat(timeBuff,"R"));
+				sendMessage(concat(timeBuff,"*R"));
 				leftMessageSent = 0;
 				rightMessageSent = 1;
 				forwardMessageSent = 0;

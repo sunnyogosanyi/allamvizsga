@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2015
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multithread", "Multithread\Multithread.csproj", "{AE418653-6E49-49A3-8C8B-B52FB93F51D6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientSocket", "..\ClientSocket\ClientSocket\ClientSocket.csproj", "{BC780D24-AF50-4151-BBF9-61206D5D6453}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{26EDDF92-409A-44A9-A0BD-90BC0C0B7D77}"
 EndProject
@@ -23,10 +21,6 @@ Global
 		{AE418653-6E49-49A3-8C8B-B52FB93F51D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE418653-6E49-49A3-8C8B-B52FB93F51D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE418653-6E49-49A3-8C8B-B52FB93F51D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BC780D24-AF50-4151-BBF9-61206D5D6453}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BC780D24-AF50-4151-BBF9-61206D5D6453}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BC780D24-AF50-4151-BBF9-61206D5D6453}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BC780D24-AF50-4151-BBF9-61206D5D6453}.Release|Any CPU.Build.0 = Release|Any CPU
 		{26EDDF92-409A-44A9-A0BD-90BC0C0B7D77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{26EDDF92-409A-44A9-A0BD-90BC0C0B7D77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26EDDF92-409A-44A9-A0BD-90BC0C0B7D77}.Release|Any CPU.ActiveCfg = Release|Any CPU
