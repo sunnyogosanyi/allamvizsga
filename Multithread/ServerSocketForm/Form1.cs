@@ -21,7 +21,7 @@ namespace ServerSocketForm
 
         private CoorinateSystemDirection mainDirection = CoorinateSystemDirection.Up;
 
-        private readonly int multiplier = 1;
+        private readonly double multiplier = 1;
 
         public enum Direction
         {
@@ -98,17 +98,18 @@ namespace ServerSocketForm
 
         private void ProcessData(string data)
         {
-            textBox3.Text += data;
+            textBox3.Text += data+System.Environment.NewLine;
             try
             {
                 var stepDirection = data.Split('*');
                 if (stepDirection.Length > 1)
                 {
                     Console.WriteLine("step {0} dir {1}", stepDirection[0], stepDirection[1]);
-                    var step = Step(Int32.Parse(stepDirection[0]))/2;
+                    Double step = Step(Double.Parse(stepDirection[0]))/100;
+  
                     var direction = CommandToDirection(stepDirection[1]);
 
-                    DrawFunction(step, direction);
+                    DrawFunction(Convert.ToInt32(step), direction);
                 }
             }
             catch (Exception ex)
@@ -153,7 +154,8 @@ namespace ServerSocketForm
         {
             textBox3.Text = "";
             points.Clear();
-            points.Add(new Point(200,200));
+            points.Add(new Point(300,300));
+            mainDirection = CoorinateSystemDirection.Up;
             //DrawFunction(Step(2), CommandToDirection("R"));
             //DrawFunction(Step(2), CommandToDirection("R"));
             //DrawFunction(Step(2), CommandToDirection("R"));
@@ -170,7 +172,7 @@ namespace ServerSocketForm
             SendCommandToClient("R");
         }
 
-        private int Step(int time)
+        private double Step(double time)
         {
             return multiplier*time;
         }

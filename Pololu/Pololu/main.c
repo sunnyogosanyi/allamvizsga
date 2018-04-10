@@ -347,6 +347,65 @@ void display_readings(const unsigned int *calibrated_values)
     }
 }
 
+void initializeCommand(){
+	  unsigned int counter; // used as a simple timer
+	  unsigned int sensors[5]; // an array to hold sensor values
+
+	  // This must be called at the beginning of 3pi code, to set up the
+	  // sensors.  We use a value of 2000 for the timeout, which
+	  // corresponds to 2000*0.4 us = 0.8 ms on our 20 MHz processor.
+	  pololu_3pi_init(2000);
+	  load_custom_characters(); // load the custom characters
+	  
+	  // Play welcome music and display a message
+	  print_from_program_space(welcome_line1);
+	  lcd_goto_xy(0,1);
+	  print_from_program_space(welcome_line2);
+	  play_from_program_space(welcome);
+	  delay_ms(1000);
+
+	  clear();
+	  print_from_program_space(demo_name_line1);
+	  lcd_goto_xy(0,1);
+	  print_from_program_space(demo_name_line2);
+	  delay_ms(1000);
+
+	  // Display battery voltage and wait for button press
+	 delay_ms(1000);
+
+	  // Auto-calibration: turn right and left while calibrating the
+	  // sensors.
+	  for(counter=0;counter<80;counter++)
+	  {
+		  if(counter < 20 || counter >= 60)
+		  set_motors(40,-40);
+		  else
+		  set_motors(-40,40);
+
+		  // This function records a set of sensor readings and keeps
+		  // track of the minimum and maximum values encountered.  The
+		  // IR_EMITTERS_ON argument means that the IR LEDs will be
+		  // turned on during the reading, which is usually what you
+		  // want.
+		  calibrate_line_sensors(IR_EMITTERS_ON);
+
+		  // Since our counter runs to 80, the total delay will be
+		  // 80*20 = 1600 ms.
+		  delay_ms(20);
+	  }
+	  set_motors(0,0);
+
+}
+
+void startCommand(){
+	print("Go!");
+
+	// Play music and wait for it to finish before we start driving.
+	play_from_program_space(go);
+	while(is_playing());
+	startRobot();
+}
+
 void initialize()
 {
     unsigned int counter; // used as a simple timer
@@ -602,7 +661,7 @@ void sendMessage(char* messag){
     len = strlen(messag);
     
     serial_send(messag,len);
-    
+    delay_ms(100);
 }
 
 char* concat(const char *s1, const char *s2)
@@ -613,27 +672,145 @@ char* concat(const char *s1, const char *s2)
 	strcat(result, s2);
 	return result;
 }
+ int leng=0;
+ char received[10] = "STOP";
+ char sent[10] = "NOPE";
+ int motorSpeed = 30;
+ int x=0;
+ int leftMessageSent = 0;
+ int rightMessageSent = 0;
+ int forwardMessageSent = 0;
+ char* direction = "*R";
+ int firstPoint = 1;
+ 
+ long startTime, endTime;
+
+void startRobot(){
+	 while(1)
+	 {
+		 unsigned int position = read_line(sensors,IR_EMITTERS_ON);
+		 lcd_goto_xy(0,1);
+		 print_long(position);
+		 lcd_goto_xy(0,0);
+		 display_readings(sensors);
+		 leng = readFromSerial();
+		 
+		 
+		 if (leng>0)
+		 {
+			 //strcpy(received,message);
+			 //char temp[4];
+			 //itoa(position,temp,10);
+			 lcd_goto_xy(3,1);
+			 print(received);
+			 sendMessage(position);
+		 }
+		 
+		 
+		 if(position < 1500)
+		 {
+			 // We are far to the right of the line: turn left.
+			 set_motors(0,motorSpeed);
+			 left_led(1);
+			 right_led(0);
+			 if ((position < 1000) && (leftMessageSent == 0)){
+				 endTime = get_ms();
+				 long timeDiff = endTime- startTime;
+				 startTime = endTime;
+				 char timeBuff[50];
+				 ltoa(timeDiff,timeBuff,10);
+				 if ( firstPoint == 0)
+				 {
+					 sendMessage(concat(timeBuff,direction));
+					 }else{
+					 firstPoint =0;
+				 }
+				 direction = "*L";
+				 leftMessageSent = 1;
+				 rightMessageSent = 0;
+				 forwardMessageSent = 0;
+			 }
+		 }
+		 else if(position < 2500)
+		 {
+			 set_motors(motorSpeed,motorSpeed);
+			 left_led(1);
+			 right_led(1);
+			 if (forwardMessageSent == 0){
+				 sendMessage("F");
+				 leftMessageSent = 0;
+				 rightMessageSent = 0;
+				 forwardMessageSent = 1;
+			 }
+		 }
+		 else
+		 {
+			 // We are far to the left of the line: turn right.
+			 set_motors(motorSpeed,0);
+			 left_led(0);
+			 right_led(1);
+			 if ((position > 3000) &&(rightMessageSent == 0)){
+				 endTime = get_ms();
+				 long timeDiff = endTime- startTime;
+				 startTime = endTime;
+				 char timeBuff[50];
+				 ltoa(timeDiff,timeBuff,10);
+				 if ( firstPoint == 0)
+				 {
+					 sendMessage(concat(timeBuff,direction));
+					 }else{
+					 firstPoint =0;
+				 }
+				 direction = "*R";
+				 leftMessageSent = 0;
+				 rightMessageSent = 1;
+				 forwardMessageSent = 0;
+			 }
+		 }
+		 
+		 
+	 }
+}
+
 
 int main()
 {
+	serial_set_baud_rate(115200);
+	serial_receive_ring(buffer, 100);
 	
-	initialize();
-	int x=0;
-    clear();
-    int leng=0;
-   int motorSpeed = 30;
-    serial_set_baud_rate(115200);
-    serial_receive_ring(buffer, 100);
-    clear();
-	char received[10] = "STOP";
-	char sent[10] = "NOPE";
-	int leftMessageSent = 0;
-	int rightMessageSent = 0;
-	int forwardMessageSent = 0;
 	
-	long startTime, endTime;
-	startTime = get_ms() /10;
-    while(1)
+	while (1)
+	{
+	
+	leng = readFromSerial();
+	if (leng>0)
+	{
+		//strcpy(received,message);
+		//char temp[4];
+		//itoa(position,temp,10);
+		lcd_goto_xy(3,1);
+		print(message);
+		if (strcmp(message,"init") == 0){
+			sendMessage("Kosz");
+			initializeCommand();
+		}
+		if (strcmp(message,"start") == 0){
+			sendMessage("Kosz");
+			startCommand();
+		}
+		sendMessage(message);
+		//leng = 0;
+	}
+	
+	delay_ms(100);
+	}
+	//initialize();
+		
+	
+	//startTime = get_ms() ;
+	
+	
+   /* while(1)
     {
 		unsigned int position = read_line(sensors,IR_EMITTERS_ON);
 		 lcd_goto_xy(0,1);
@@ -661,12 +838,18 @@ int main()
 			left_led(1);
 			right_led(0);
 			if ((position < 1000) && (leftMessageSent == 0)){
-				endTime = get_ms()/10;
+				endTime = get_ms();
 				long timeDiff = endTime- startTime;
 				startTime = endTime;
 				char timeBuff[50];
 				ltoa(timeDiff,timeBuff,10);
-				sendMessage(concat(timeBuff,"*L"));
+				if ( firstPoint == 0)
+				{
+					sendMessage(concat(timeBuff,direction));
+				}else{
+					firstPoint =0;
+				}
+				direction = "*L";
 				leftMessageSent = 1;
 				rightMessageSent = 0;
 				forwardMessageSent = 0;
@@ -691,12 +874,18 @@ int main()
 			left_led(0);
 			right_led(1);
 			if ((position > 3000) &&(rightMessageSent == 0)){
-				endTime = get_ms()/10;
+				endTime = get_ms();
 				long timeDiff = endTime- startTime;
 				startTime = endTime;
 				char timeBuff[50];
 				ltoa(timeDiff,timeBuff,10);
-				sendMessage(concat(timeBuff,"*R"));
+				if ( firstPoint == 0)
+				{
+					sendMessage(concat(timeBuff,direction));
+					}else{
+					firstPoint =0;
+				}
+				direction = "*R";
 				leftMessageSent = 0;
 				rightMessageSent = 1;
 				forwardMessageSent = 0;
@@ -704,13 +893,6 @@ int main()
 		}
 		
     
-	/*	lcd_goto_xy(0,1);
-		print_long(x++);
-	
-		
-		//delay_ms(200);
-		clear();
-        */
-    }
+    }*/
 }
 
