@@ -159,7 +159,7 @@ namespace ServerSocketForm
             //DrawFunction(Step(2), CommandToDirection("R"));
             //DrawFunction(Step(2), CommandToDirection("R"));
             //DrawFunction(Step(2), CommandToDirection("R"));
-            pictureBox1.CreateGraphics().Clear(Color.Aqua);
+            pictureBox1.CreateGraphics().Clear(Color.White);
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -287,6 +287,26 @@ namespace ServerSocketForm
 
             blackPan.Width = 5;
             drawingArea.DrawLines(blackPan, points.ToArray());
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            SendCommandToClient("init");
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            SendCommandToClient("start");
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            SendCommandToClient("stop");
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            SendCommandToClient("battery");
         }
     }
 }

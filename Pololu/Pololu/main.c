@@ -27,7 +27,8 @@ char* messType;
 char* messCommand;
 const char welcome[] PROGMEM = ">g32>>c32";
 const char go[] PROGMEM = "L16 cdegreg4";
-
+const char stopSound[] PROGMEM = "L10 abcd4";
+int progress =0;
 
 // This routine will be called repeatedly to keep the PID algorithm running
 void pid_check()
@@ -347,64 +348,6 @@ void display_readings(const unsigned int *calibrated_values)
     }
 }
 
-void initializeCommand(){
-	  unsigned int counter; // used as a simple timer
-	  unsigned int sensors[5]; // an array to hold sensor values
-
-	  // This must be called at the beginning of 3pi code, to set up the
-	  // sensors.  We use a value of 2000 for the timeout, which
-	  // corresponds to 2000*0.4 us = 0.8 ms on our 20 MHz processor.
-	  pololu_3pi_init(2000);
-	  load_custom_characters(); // load the custom characters
-	  
-	  // Play welcome music and display a message
-	  print_from_program_space(welcome_line1);
-	  lcd_goto_xy(0,1);
-	  print_from_program_space(welcome_line2);
-	  play_from_program_space(welcome);
-	  delay_ms(1000);
-
-	  clear();
-	  print_from_program_space(demo_name_line1);
-	  lcd_goto_xy(0,1);
-	  print_from_program_space(demo_name_line2);
-	  delay_ms(1000);
-
-	  // Display battery voltage and wait for button press
-	 delay_ms(1000);
-
-	  // Auto-calibration: turn right and left while calibrating the
-	  // sensors.
-	  for(counter=0;counter<80;counter++)
-	  {
-		  if(counter < 20 || counter >= 60)
-		  set_motors(40,-40);
-		  else
-		  set_motors(-40,40);
-
-		  // This function records a set of sensor readings and keeps
-		  // track of the minimum and maximum values encountered.  The
-		  // IR_EMITTERS_ON argument means that the IR LEDs will be
-		  // turned on during the reading, which is usually what you
-		  // want.
-		  calibrate_line_sensors(IR_EMITTERS_ON);
-
-		  // Since our counter runs to 80, the total delay will be
-		  // 80*20 = 1600 ms.
-		  delay_ms(20);
-	  }
-	  set_motors(0,0);
-
-}
-
-void startCommand(){
-	print("Go!");
-
-	// Play music and wait for it to finish before we start driving.
-	play_from_program_space(go);
-	while(is_playing());
-	startRobot();
-}
 
 void initialize()
 {
@@ -685,8 +628,11 @@ char* concat(const char *s1, const char *s2)
  
  long startTime, endTime;
 
+
+
 void startRobot(){
-	 while(1)
+	startTime = get_ms();
+	 while(progress == 1)
 	 {
 		 unsigned int position = read_line(sensors,IR_EMITTERS_ON);
 		 lcd_goto_xy(0,1);
@@ -701,9 +647,13 @@ void startRobot(){
 			 //strcpy(received,message);
 			 //char temp[4];
 			 //itoa(position,temp,10);
+			 if (strcmp(message,"stop") == 0){
 			 lcd_goto_xy(3,1);
 			 print(received);
-			 sendMessage(position);
+			 sendMessage("INTERRUPT");
+			 progress = 0;
+
+			 }
 		 }
 		 
 		 
@@ -773,6 +723,87 @@ void startRobot(){
 }
 
 
+
+
+void initializeCommand(){
+	unsigned int counter; // used as a simple timer
+	unsigned int sensors[5]; // an array to hold sensor values
+
+	// This must be called at the beginning of 3pi code, to set up the
+	// sensors.  We use a value of 2000 for the timeout, which
+	// corresponds to 2000*0.4 us = 0.8 ms on our 20 MHz processor.
+	pololu_3pi_init(2000);
+	load_custom_characters(); // load the custom characters
+	
+	// Play welcome music and display a message
+	print_from_program_space(welcome_line1);
+	lcd_goto_xy(0,1);
+	print_from_program_space(welcome_line2);
+	play_from_program_space(welcome);
+	delay_ms(1000);
+
+	clear();
+	print_from_program_space(demo_name_line1);
+	lcd_goto_xy(0,1);
+	print_from_program_space(demo_name_line2);
+	delay_ms(1000);
+
+	// Display battery voltage and wait for button press
+	delay_ms(1000);
+
+	// Auto-calibration: turn right and left while calibrating the
+	// sensors.
+	for(counter=0;counter<80;counter++)
+	{
+		if(counter < 20 || counter >= 60)
+		set_motors(40,-40);
+		else
+		set_motors(-40,40);
+
+		// This function records a set of sensor readings and keeps
+		// track of the minimum and maximum values encountered.  The
+		// IR_EMITTERS_ON argument means that the IR LEDs will be
+		// turned on during the reading, which is usually what you
+		// want.
+		calibrate_line_sensors(IR_EMITTERS_ON);
+
+		// Since our counter runs to 80, the total delay will be
+		// 80*20 = 1600 ms.
+		delay_ms(20);
+	}
+	set_motors(0,0);
+
+}
+
+void startCommand(){
+	print("Go!");
+
+	// Play music and wait for it to finish before we start driving.
+	play_from_program_space(go);
+	while(is_playing());
+	progress = 1;
+	startRobot();
+	
+}
+
+void stopCommand(){
+	set_motors(0,0);
+	play_from_program_space(stopSound);
+	while(is_playing());
+	
+}
+
+void batteryCommand(){
+	int bat = read_battery_millivolts();
+
+	clear();
+	print_long(bat);
+	print("mV");
+	char messBuff[50];
+	itoa(bat,messBuff,10);
+	sendMessage(messBuff);
+}
+
 int main()
 {
 	serial_set_baud_rate(115200);
@@ -791,12 +822,20 @@ int main()
 		lcd_goto_xy(3,1);
 		print(message);
 		if (strcmp(message,"init") == 0){
-			sendMessage("Kosz");
+			sendMessage("initt");
 			initializeCommand();
 		}
 		if (strcmp(message,"start") == 0){
-			sendMessage("Kosz");
+			sendMessage("startt");
 			startCommand();
+		}
+		if (strcmp(message,"stop") == 0){
+			sendMessage("stopp");
+			stopCommand();
+		}
+		if (strcmp(message,"battery") == 0){
+			sendMessage("batteryy");
+			batteryCommand();
 		}
 		sendMessage(message);
 		//leng = 0;
