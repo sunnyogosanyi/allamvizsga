@@ -12,16 +12,22 @@ namespace ServerSocketForm
     public partial class Form1 : Form
     {
         private TcpListener listener;
-        private Thread t;
+        private Thread serverThread;
         private TcpClient client;
 
         private Graphics drawingArea;
-        private readonly Pen blackPan = new Pen(Color.Green);
+        Bitmap DrawArea;
+        private readonly Pen blackPan = new Pen(Color.Black);
         private readonly List<Point> points = new List<Point>();
 
         private CoorinateSystemDirection mainDirection = CoorinateSystemDirection.Up;
 
-        private readonly double multiplier = 1;
+        private readonly double multiplier = 100;
+
+        Graphics g;
+            
+
+            Pen mypen = new Pen(Color.Black);
 
         public enum Direction
         {
@@ -41,26 +47,62 @@ namespace ServerSocketForm
         public Form1()
         {
             InitializeComponent();
-            points.Add(new Point(300, 300));
+            points.Add(new Point(pictureBox1.Height/2, pictureBox1.Width/2));
+            // Set the size of the PictureBox control.
+            //  this.pictureBox1.Size = new System.Drawing.Size(954, 547);
+
+            //Set the SizeMode to center the image.
+            //  this.pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
+            panel1.AutoScroll = true;
+
+            // Set the border style to a three-dimensional border.
+
+
+            // Set the image property.
+            pictureBox1.Image = Image.FromFile(@"D:\\Sanyessz\\allamvizsga\\Multithread\\cat.jpg");
+
+            DrawArea = new Bitmap(pictureBox1.Size.Width, pictureBox1.Size.Height);
+            pictureBox1.Image = DrawArea;
+            //new Bitmap(typeof(Button), "D://Sanyessz//allamvizsga//Multithread//cat.jpg");
+
+            g = Graphics.FromImage(DrawArea);
+            serverIPtextBox.Text = GetLocalIPAddress();
+            Console.WriteLine(GetLocalIPAddress());
+        }
+
+        public static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
         private void StartListener()
         {
-            t = new Thread(RunListener);
-            t.Start();
+            serverThread = new Thread(RunListener);
+            serverThread.IsBackground = true;
+            serverThread.Start();
         }
 
         private void RunListener()
         {
-            listener = new TcpListener(IPAddress.Parse(textBox4.Text), Int32.Parse(textBox5.Text));
+            listener = new TcpListener(IPAddress.Parse(serverIPtextBox.Text), Int32.Parse(serverPorttextBox.Text));
             listener.Start();
-            Invoke(new Action(() => textBox1.Text = "Server starterd"));
+            Invoke(new Action(() => serverMessagetextBox.Text = "Server starterd"));
             while (true)
             {
                 client = listener.AcceptTcpClient();
                 Invoke(
                     new Action(
-                        () => textBox1.Text = string.Format("New connection from {0}", client.Client.RemoteEndPoint)));
+                        () =>
+                            serverMessagetextBox.Text =
+                                string.Format("New connection from {0}", client.Client.RemoteEndPoint)));
                 ThreadPool.QueueUserWorkItem(ProcessClient, client);
             }
         }
@@ -98,18 +140,23 @@ namespace ServerSocketForm
 
         private void ProcessData(string data)
         {
-            textBox3.Text += data+System.Environment.NewLine;
+            
             try
             {
                 var stepDirection = data.Split('*');
                 if (stepDirection.Length > 1)
                 {
                     Console.WriteLine("step {0} dir {1}", stepDirection[0], stepDirection[1]);
-                    Double step = Step(Double.Parse(stepDirection[0]))/100;
-  
+                    var step = Step(Math.Round(Double.Parse(stepDirection[0])/1000));
+                    Console.WriteLine("Step: {0}", step);
+                    clientOutputtextBox.AppendText(data + "->" + step + Environment.NewLine);
                     var direction = CommandToDirection(stepDirection[1]);
 
                     DrawFunction(Convert.ToInt32(step), direction);
+                }
+                else
+                {
+                    clientOutputtextBox.AppendText(data + Environment.NewLine);
                 }
             }
             catch (Exception ex)
@@ -125,7 +172,7 @@ namespace ServerSocketForm
 
         private void button2_Click(object sender, EventArgs e)
         {
-            SendCommandToClient(textBox2.Text);
+            SendCommandToClient(inputtextBox.Text);
         }
 
 
@@ -133,7 +180,7 @@ namespace ServerSocketForm
         {
             try
             {
-                var client = new TcpClient(textBox6.Text, Int32.Parse(textBox7.Text));
+                var client = new TcpClient(clientIPtextBox.Text, Int32.Parse(clientPorttextBox.Text));
 
                 var writer = new StreamWriter(client.GetStream());
 
@@ -152,24 +199,26 @@ namespace ServerSocketForm
 
         private void button3_Click(object sender, EventArgs e)
         {
-            textBox3.Text = "";
+            clientOutputtextBox.Text = "";
             points.Clear();
-            points.Add(new Point(300,300));
+            points.Add(new Point(pictureBox1.Height / 2, pictureBox1.Width / 2));
             mainDirection = CoorinateSystemDirection.Up;
             //DrawFunction(Step(2), CommandToDirection("R"));
             //DrawFunction(Step(2), CommandToDirection("R"));
             //DrawFunction(Step(2), CommandToDirection("R"));
-            pictureBox1.CreateGraphics().Clear(Color.White);
+            pictureBox1.Image = null;
+            //g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height));
+            g = Graphics.FromImage(DrawArea);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            SendCommandToClient("L");
+            SendCommandToClient(String.Concat(inputtextBox.Text, "*L"));
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            SendCommandToClient("R");
+            SendCommandToClient(String.Concat(inputtextBox.Text, "*R"));
         }
 
         private double Step(double time)
@@ -264,12 +313,12 @@ namespace ServerSocketForm
             drawingArea = pictureBox1.CreateGraphics();
 
             var newPoint = CalculatePoint(points[points.Count - 1], length, direction);
-            
+
             points.Add(newPoint);
             Console.WriteLine("DrawFunction {0} {1} {2} {3}", (int) mainDirection, (int) direction,
-            ((int) mainDirection + (int) direction),
-            ((int) mainDirection + (int) direction)%4);
-            int temp =(int)mainDirection + (int)direction;
+                ((int) mainDirection + (int) direction),
+                ((int) mainDirection + (int) direction)%4);
+            var temp = (int) mainDirection + (int) direction;
 
             switch (temp)
             {
@@ -286,7 +335,15 @@ namespace ServerSocketForm
             Console.WriteLine("Main {0} {1} - {2}", mainDirection, newPoint.X, newPoint.Y);
 
             blackPan.Width = 5;
-            drawingArea.DrawLines(blackPan, points.ToArray());
+            //drawingArea.DrawLines(blackPan, points.ToArray());
+
+            g = Graphics.FromImage(DrawArea);
+            g.DrawLines(blackPan, points.ToArray());
+
+            pictureBox1.Image = DrawArea;
+
+            g.Dispose();
+            
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -307,6 +364,119 @@ namespace ServerSocketForm
         private void button9_Click(object sender, EventArgs e)
         {
             SendCommandToClient("battery");
+        }
+
+        private void btnExitProgram_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            //  serverThread.
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            ctrlKeyDown = false;
+
+            shiftKeyDown = false;
+            Graphics g;
+            g = Graphics.FromImage(DrawArea);
+
+            Pen mypen = new Pen(Brushes.Black);
+            g.DrawLine(mypen, 0, 0, 2000, 2000);
+            g.Clear(Color.White);
+            g.Dispose();
+            WindowState = FormWindowState.Maximized;
+           // panel1.Size = new Size(Form1.,Screen.FromControl(this).Bounds.Height);
+            BackColor = Color.DarkGray;
+
+        }
+
+        private void Form4_MouseWheel(object sender, MouseEventArgs e)
+        {
+            var IsGoUp = e.Delta > 0 ? true : false;
+
+            Console.WriteLine(IsGoUp.ToString());
+            Console.WriteLine(panel1.HorizontalScroll.Value);
+                
+                if (IsGoUp)
+                {
+                    Console.WriteLine(pictureBox1.Size.Height + 50);
+                    pictureBox1.Size = new Size(pictureBox1.Size.Height + 50, pictureBox1.Size.Width + 50);
+                }
+
+                if (!IsGoUp)
+                {
+                    Console.WriteLine(pictureBox1.Size.Height - 50);
+                    pictureBox1.Size = new Size(pictureBox1.Size.Height - 50, pictureBox1.Size.Width - 50);
+                }
+            
+
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            Graphics g;
+            g = Graphics.FromImage(DrawArea);
+
+            Pen mypen = new Pen(Color.Black);
+
+            g.DrawLine(mypen, 0, 0, 200, 150);
+
+            pictureBox1.Image = DrawArea;
+
+            g.Dispose();
+        }
+
+        private bool Dragging;
+        private int xPos;
+        private int yPos;
+
+        private bool ctrlKeyDown;
+
+        private bool shiftKeyDown;
+
+        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            var c = sender as Control;
+            if (Dragging && c != null)
+            {
+                c.Top = e.Y + c.Top - yPos;
+                c.Left = e.X + c.Left - xPos;
+            }
+        }
+
+        private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            Dragging = false;
+        }
+
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                Dragging = true;
+                xPos = e.X;
+                yPos = e.Y;
+            }
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            ctrlKeyDown = e.Control;
+
+            shiftKeyDown = e.Shift;
+            Console.WriteLine("DOWN");
+        }
+
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+            ctrlKeyDown = e.Control;
+
+            shiftKeyDown = e.Shift;
+            Console.WriteLine("UP");
         }
     }
 }
