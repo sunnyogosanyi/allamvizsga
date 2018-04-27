@@ -147,7 +147,32 @@ char* concat(const char *s1, const char *s2)
 	return result;
 }
  
+void StopAtCrossRoad()
+{
+	if((sensors[0] == 1000) && (sensors[3] == 1000) && (sensors[2] != 1000))
+	{
+		progress = 0;
+		motorSpeed = 0;
+		set_motors(0,0);
+		sendMessage("LF");
+	}
+	else if ((sensors[4] == 1000) && (sensors[1] == 1000) && (sensors[2] != 1000))
+	{
+		progress = 0;
+		motorSpeed = 0;
+		set_motors(0,0);
+		sendMessage("RF");
 
+	}
+	else if ((sensors[0] == 1000) &&(sensors[4] == 1000) && (sensors[2] == 1000))
+	{
+		progress = 0;
+		motorSpeed = 0;
+		set_motors(0,0);
+		sendMessage("LR");
+		
+	}
+}
 
 void startRobot(){
 	startTime = get_ms();
@@ -159,8 +184,11 @@ void startRobot(){
 		 lcd_goto_xy(0,0);
 		 display_readings(sensors);
 		 leng = readFromSerial();
-		 
-		 
+		 int sen = sensors[0];
+		 //char timeBuff[50];
+		 //itoa(sen,timeBuff,10);
+		 //sendMessage(timeBuff);
+		 StopAtCrossRoad();
 		 if (leng>0)
 		 {
 			 //strcpy(received,message);
@@ -285,6 +313,7 @@ void startCommand(){
 	play_from_program_space(go);
 	while(is_playing());
 	progress = 1;
+	motorSpeed = 30;
 	startRobot();
 	
 }
@@ -293,7 +322,7 @@ void stopCommand(){
 	set_motors(0,0);
 	play_from_program_space(stopSound);
 	while(is_playing());
-	
+	firstPoint = 1;
 }
 
 void batteryCommand(){

@@ -59,7 +59,7 @@ namespace ServerSocketForm
 
 
             // Set the image property.
-            pictureBox1.Image = Image.FromFile(@"D:\\Sanyessz\\allamvizsga\\Multithread\\cat.jpg");
+           // pictureBox1.Image = Image.FromFile(@"D:\\Sanyessz\\allamvizsga\\Multithread\\cat.jpg");
 
             DrawArea = new Bitmap(pictureBox1.Size.Width, pictureBox1.Size.Height);
             pictureBox1.Image = DrawArea;
