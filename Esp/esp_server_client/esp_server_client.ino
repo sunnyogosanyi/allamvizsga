@@ -1,16 +1,16 @@
 #include <ESP8266WiFi.h>
 
-const char* ssid = "ASUS_C4";
-const char* password = "Mazda20160130!";
+const char* ssid = "Asus";
+const char* password = "123456789";
 
 //Eva laptop
-const char* host = "192.168.88.28";
+const char* host = "192.168.1.145";
 //PC
 //const char* host = "192.168.88.14";
 String ipAddress;
 
-IPAddress ip(192,168,88,210);
-IPAddress gateway(192,168,88,1);
+IPAddress ip(192,168,1,210);
+IPAddress gateway(192,168,1,1);
 IPAddress subnet(255,255,255,0);
 
 const int httpPort = 5100;
@@ -34,7 +34,8 @@ WiFi.config(ip, gateway, subnet);
     delay(50);
     Serial.print(".");
   }
-  
+  ipAddress=WiFi.localIP().toString();
+  Serial.println(ipAddress);
   while (!client.connect(host, httpPort)){Serial.println("Not yet");}
   delay(50);
   ipAddress=WiFi.localIP().toString();
