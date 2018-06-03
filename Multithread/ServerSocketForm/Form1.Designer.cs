@@ -55,6 +55,7 @@ namespace ServerSocketForm
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.forwardButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -168,23 +169,23 @@ namespace ServerSocketForm
             // 
             // leftButton
             // 
-            this.leftButton.Location = new System.Drawing.Point(6, 67);
+            this.leftButton.Location = new System.Drawing.Point(7, 72);
             this.leftButton.Name = "leftButton";
             this.leftButton.Size = new System.Drawing.Size(75, 23);
             this.leftButton.TabIndex = 12;
             this.leftButton.Text = "Left";
             this.leftButton.UseVisualStyleBackColor = true;
-            this.leftButton.Click += new System.EventHandler(this.button4_Click);
+            this.leftButton.Click += new System.EventHandler(this.leftButton_Click);
             // 
             // rightButton
             // 
-            this.rightButton.Location = new System.Drawing.Point(189, 67);
+            this.rightButton.Location = new System.Drawing.Point(194, 72);
             this.rightButton.Name = "rightButton";
-            this.rightButton.Size = new System.Drawing.Size(80, 28);
+            this.rightButton.Size = new System.Drawing.Size(75, 23);
             this.rightButton.TabIndex = 13;
             this.rightButton.Text = "Right";
             this.rightButton.UseVisualStyleBackColor = true;
-            this.rightButton.Click += new System.EventHandler(this.button5_Click);
+            this.rightButton.Click += new System.EventHandler(this.rightButton_Click);
             // 
             // pictureBox1
             // 
@@ -237,7 +238,7 @@ namespace ServerSocketForm
             this.batteryButton.TabIndex = 19;
             this.batteryButton.Text = "Battery";
             this.batteryButton.UseVisualStyleBackColor = true;
-            this.batteryButton.Click += new System.EventHandler(this.button9_Click);
+            this.batteryButton.Click += new System.EventHandler(this.batteryButton_Click);
             // 
             // button1
             // 
@@ -261,6 +262,7 @@ namespace ServerSocketForm
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.forwardButton);
             this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.clientIPtextBox);
             this.panel2.Controls.Add(this.label2);
@@ -298,6 +300,16 @@ namespace ServerSocketForm
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(294, 154);
             this.panel4.TabIndex = 25;
+            // 
+            // forwardButton
+            // 
+            this.forwardButton.Location = new System.Drawing.Point(97, 72);
+            this.forwardButton.Name = "forwardButton";
+            this.forwardButton.Size = new System.Drawing.Size(75, 23);
+            this.forwardButton.TabIndex = 14;
+            this.forwardButton.Text = "Forward";
+            this.forwardButton.UseVisualStyleBackColor = true;
+            this.forwardButton.Click += new System.EventHandler(this.forwardButton_Click);
             // 
             // Form1
             // 
@@ -354,6 +366,7 @@ namespace ServerSocketForm
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private Panel panel4;
+        private Button forwardButton;
     }
 }
 

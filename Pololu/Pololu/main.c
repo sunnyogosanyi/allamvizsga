@@ -154,14 +154,46 @@ void StopAtCrossRoad()
 		progress = 0;
 		motorSpeed = 0;
 		set_motors(0,0);
-		sendMessage("LF");
+		endTime = get_ms();
+		long timeDiff = endTime- startTime;
+		startTime = endTime;
+		char timeBuff[50];
+		ltoa(timeDiff,timeBuff,10);
+		if ( firstPoint == 0)
+		{
+			sendMessage(concat(timeBuff,direction));
+			}else{
+			firstPoint =0;
+		}
+		direction = "*LF";
+		leftMessageSent = 0;
+		rightMessageSent = 0;
+		forwardMessageSent = 0;
+		delay_ms(100);
+		sendMessage(concat(timeBuff,direction));
 	}
 	else if ((sensors[4] == 1000) && (sensors[1] == 1000) && (sensors[2] != 1000))
 	{
 		progress = 0;
 		motorSpeed = 0;
 		set_motors(0,0);
-		sendMessage("RF");
+		endTime = get_ms();
+		long timeDiff = endTime- startTime;
+		startTime = endTime;
+		char timeBuff[50];
+		ltoa(timeDiff,timeBuff,10);
+		if ( firstPoint == 0)
+		{
+			sendMessage(concat(timeBuff,direction));
+			}else{
+			firstPoint =0;
+		}
+		direction = "*RF";
+		leftMessageSent = 0;
+		rightMessageSent = 0;
+		forwardMessageSent = 0;
+		delay_ms(100);
+		sendMessage(concat(timeBuff,direction));
 
 	}
 	else if ((sensors[0] == 1000) &&(sensors[4] == 1000) && (sensors[2] == 1000))
@@ -169,7 +201,23 @@ void StopAtCrossRoad()
 		progress = 0;
 		motorSpeed = 0;
 		set_motors(0,0);
-		sendMessage("LR");
+		endTime = get_ms();
+		long timeDiff = endTime- startTime;
+		startTime = endTime;
+		char timeBuff[50];
+		ltoa(timeDiff,timeBuff,10);
+		if ( firstPoint == 0)
+		{
+			sendMessage(concat(timeBuff,direction));
+			}else{
+			firstPoint =0;
+		}
+		direction = "*LR";
+		leftMessageSent = 0;
+		rightMessageSent = 0;
+		forwardMessageSent = 0;
+		delay_ms(100);
+		sendMessage(concat(timeBuff,direction));
 		
 	}
 }
@@ -195,11 +243,12 @@ void startRobot(){
 			 //char temp[4];
 			 //itoa(position,temp,10);
 			 if (strcmp(message,"stop") == 0){
+				 set_motors(0,0);
 			 lcd_goto_xy(3,1);
 			 print(received);
 			 sendMessage("INTERRUPT");
 			 progress = 0;
-
+				break;
 			 }
 		 }
 		 
@@ -336,6 +385,38 @@ void batteryCommand(){
 	sendMessage(messBuff);
 }
 
+void rightCommand()
+{
+	progress = 1;
+	motorSpeed = 30;
+	set_motors(motorSpeed,-(motorSpeed/2));
+	delay_ms(400);
+	//set_motors(0,0);
+	direction = "*R";
+	startRobot();
+}
+
+void leftCommand()
+{
+	progress = 1;
+	motorSpeed = 30;
+	set_motors(-(motorSpeed/2),motorSpeed);
+	delay_ms(400);
+	//set_motors(0,0);
+	direction = "*L";
+	startRobot();
+}
+
+void forwardCommand()
+{
+	progress = 1;
+	motorSpeed = 30;
+	set_motors(motorSpeed,motorSpeed);
+	delay_ms(200);
+	direction = "*F";
+	startRobot();
+}
+
 int main()
 {
 	serial_set_baud_rate(115200);
@@ -369,6 +450,20 @@ int main()
 			sendMessage("batteryy");
 			batteryCommand();
 		}
+		
+		if (strcmp(message,"right") == 0){
+			sendMessage("right");
+			rightCommand();
+		}
+		if (strcmp(message,"left") == 0){
+			sendMessage("left");
+			leftCommand();
+		}
+		if (strcmp(message,"forward") == 0){
+			sendMessage("forward");
+			forwardCommand();
+		}
+		
 		sendMessage(message);
 		//leng = 0;
 	}
